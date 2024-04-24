@@ -58,13 +58,21 @@ def authenticate(user, password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
-@app.get("/")
+@app.get(
+    path="/",
+    response_description="Hello AI Adventure Game",
+    status_code=status.HTTP_200_OK
+)
 async def root(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
     authenticate(credentials.username, credentials.password)
-    return {"Hello": "World"}
+    return {"Hello": "AI Adventure Game"}
 
 
-@app.post("/make_move")
+@app.post(
+    path="/make_move",
+    response_description="Generate the next move",
+    status_code=status.HTTP_200_OK
+)
 async def generate_response(request: Request):
     global conversations
     request_data = await request.json()
@@ -174,6 +182,9 @@ async def create_item(game: GameModel):
     status_code=status.HTTP_200_OK
 )
 async def list_games():
+    """
+    List all the games from the database on the marketplace
+    """
     try:
         games = game_collection.find()
         if games:
@@ -196,7 +207,7 @@ async def get_game(game_id: str):
     Get the record for a specific game, looked up by `id`.
     """
     if (
-        game := game_collection.find_one({"_id": ObjectId(game_id)})
+            game := game_collection.find_one({"_id": ObjectId(game_id)})
     ) is not None:
         return game
 
@@ -210,9 +221,8 @@ async def get_game(game_id: str):
 )
 async def delete_game_by_id(game_id: str):
     """
-    Get the record for a specific game, looked up by `id`.
+    Delete a game by `id`.
     """
-
     delete_data(game_collection, game_id)
 
 
@@ -222,6 +232,11 @@ async def delete_game_by_id(game_id: str):
     status_code=status.HTTP_200_OK
 )
 async def gen_image(request: Request):
+    """
+    Generate Image with stability AI
+    :param request: request containing a prompt for the image
+    :return: image
+    """
     request_data = await request.json()
     prompt = request_data['prompt']
     logger.debug(f'PROMPT: {prompt}')
