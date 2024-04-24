@@ -1,8 +1,5 @@
-from typing import Any, Dict
-
 from bson import ObjectId
-from pydantic import BaseModel, GetJsonSchemaHandler
-from pydantic_core import CoreSchema
+from pydantic import BaseModel
 
 
 class GameSchema(BaseModel):
