@@ -14,8 +14,7 @@ from src.llms.prompt_eng import build_first_prompt, build_next_prompt, build_ima
 from src.llms.stability import generate_image
 from src.utils.config import cfg
 from src.utils.log_handler import setup_logger
-from src.utils.mongo import fetch_one_data
-from src.utils.mongo import get_client, get_collection
+from src.utils.mongo import get_client, get_collection, fetch_one_data, delete_data
 
 client = get_client()
 game_collection = get_collection(client)
@@ -202,6 +201,33 @@ async def get_game(game_id: str):
         return game
 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Game {game_id} not found")
+
+
+@app.delete(
+    "/games/{game_id}",
+    response_description="Delete a single game",
+    status_code=status.HTTP_204_NO_CONTENT
+)
+async def delete_game_by_id(game_id: str):
+    """
+    Get the record for a specific game, looked up by `id`.
+    """
+
+    delete_data(game_collection, game_id)
+
+
+@app.post(
+    "/stability/",
+    response_description='Generate Image',
+    status_code=status.HTTP_200_OK
+)
+async def gen_image(request: Request):
+    request_data = await request.json()
+    prompt = request_data['prompt']
+    logger.debug(f'PROMPT: {prompt}')
+    image = generate_image(prompt)  # Call the correct function here
+    logger.debug(f'IMAGE: {image}')
+    return image
 
 
 # RUN!!!
